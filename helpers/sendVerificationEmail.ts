@@ -1,27 +1,57 @@
-import { resend } from "@/lib/resend";
-
-import VerificationEmail from "../emails/VerificationEmail"; 
-import { ApiResponse } from "@/types/ApiResponse";
+import { transporter } from "@/lib/mailer";
 
 export async function sendVerificationEmail(
     email: string,
-    username: string ,
+    username: string,
     verifycode: string
-) : Promise<ApiResponse> {
-    try {
-        await resend.emails.send({
-            from: "onboarding@resend.dev",
-            to: email,
-            subject: 'Mystry message | Verification code',
-            react: VerificationEmail({username,otp: verifycode})
+) {
+    console.log("📧 sendVerificationEmail called");
+    console.log("📧 Sending to:", email);
+    console.log("📧 Gmail user:", process.env.GMAIL_USER);
 
-        })
-        return {success: true, message: 'successfully send verification email'}  
+    try {
+        const info = await transporter.sendMail({
+            from: process.env.GMAIL_USER,
+            to: email,
+            subject: "Mystery Message - Verification code",
+
+            text: `Hi ${username},
+
+Your Mystery Message verification code is:
+
+${verifycode}
+
+This code will expire soon.
+
+If you did not create this account, you can ignore this email.
+`,
+
+            html: `
+                <div>
+                    <h2>Mystery Message</h2>
+                    <p>Hi ${username},</p>
+                    <p>Your verification code is:</p>
+                    <h1>${verifycode}</h1>
+                    <p>This code will expire soon.</p>
+                </div>
+            `,
+        });
+
+        console.log("✅ EMAIL SENT");
+        console.log("Message ID:", info.messageId);
+        console.log("Response:", info.response);
+
+        return {
+            success: true,
+            message: "Successfully sent verification email",
+        };
 
     } catch (emailError) {
-        console.log("error sending verification email", emailError);
-        return {success: false, message: 'failed to send verification email'}      
+        console.error("❌ ERROR SENDING EMAIL:", emailError);
 
+        return {
+            success: false,
+            message: "Failed to send verification email",
+        };
     }
-
 }
