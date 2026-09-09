@@ -15,11 +15,13 @@ export async function POST(request:Request) {
             success: false,
             message: "user not found"
             },
-            {status:500}
+            {status:404}
            )
         }
 
-        const isCodeValid = user.verifyCode === code;
+        console.log("Verify debug:", { stored: user.verifyCode, received: code, expiry: user.verifyCodeExpiry, now: new Date() });
+
+        const isCodeValid = user.verifyCode === code.trim();
         const isCodeNotExpired = new Date(user.verifyCodeExpiry) > new Date();
 
         if (isCodeValid && isCodeNotExpired) {
