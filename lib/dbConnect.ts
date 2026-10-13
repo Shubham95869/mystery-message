@@ -4,27 +4,35 @@ import mongoose from "mongoose";
 type ConnectionObject = {
     isConnected?: number
 }
-const connection : ConnectionObject ={}
+const connection : ConnectionObject ={};
 
 async function dbConnect() : Promise<void> {
-    if (connection.isConnected) {
+    if (connection.isConnected === 1) {
         console.log("Already connected to db");
-        return
+        return;
     }
 
     try {
-        const db = await mongoose.connect(process.env.MONGODB_URI || '' , {});
+        const mongoUri = process.env.MONGODB_URI;
 
-        connection.isConnected = db.connections[0].readyState
+        if (!mongoUri) {
+            throw new Error("MONGODB_URI is missing from .env")
+        }
+
+        const db = await mongoose.connect(mongoUri);
+
+        connection.isConnected = db.connection.readyState;
 
         console.log("db connected successfully");
 
 
     } catch (error) {
+        connection.isConnected = 0;
 
-        console.log("db connection failed");
+        console.error("db connection failed", error);
+        throw error;
+
         
-         process.exit(1)
 
     }
     

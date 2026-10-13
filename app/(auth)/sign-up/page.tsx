@@ -102,11 +102,11 @@ const page = () => {
       console.error("Error in signup of user", error)
 
       const axiosError = error as AxiosError<ApiResponse>
-      const errorMessage = axiosError.response?.data.message
+      const errorMessage = axiosError.response?.data?.message ?? "Something went wrong. Please try again.";
 
       toast.add({
         title: 'Signup failed',
-        description: errorMessage ?? "Something went wrong. Please try again.",
+        description: errorMessage ,
         type: "error"
       })
     } finally {
