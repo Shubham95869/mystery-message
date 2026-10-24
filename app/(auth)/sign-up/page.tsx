@@ -108,6 +108,7 @@ const page = () => {
         title: 'Signup failed',
         description: errorMessage ,
         type: "error"
+        
       })
     } finally {
       setIsSubmitting(false)
